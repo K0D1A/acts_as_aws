@@ -7,6 +7,7 @@ module ActsAsAws
         include ActsAsAcmCertificate
         include ActsAsAwsLoadBalancer
         include ActsAsElbHttpListener
+        include ActsAsElbHttpsListener
       end
     end
   end

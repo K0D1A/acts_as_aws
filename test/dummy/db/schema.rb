@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 5) do
+ActiveRecord::Schema.define(version: 6) do
 
   create_table "certificates", force: :cascade do |t|
     t.integer "client_id", null: false
@@ -50,6 +50,19 @@ ActiveRecord::Schema.define(version: 5) do
     t.index ["load_balancer_id"], name: "index_http_listeners_on_load_balancer_id"
   end
 
+  create_table "https_listeners", force: :cascade do |t|
+    t.integer "load_balancer_id", null: false
+    t.integer "certificate_id", null: false
+    t.string "elb_ssl_policy"
+    t.string "elb_https_listener_arn"
+    t.string "elb_https_listener_status"
+    t.string "elb_https_listener_error"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["certificate_id"], name: "index_https_listeners_on_certificate_id"
+    t.index ["load_balancer_id"], name: "index_https_listeners_on_load_balancer_id"
+  end
+
   create_table "load_balancers", force: :cascade do |t|
     t.integer "client_id", null: false
     t.string "aws_load_balancer_arn"
@@ -65,5 +78,7 @@ ActiveRecord::Schema.define(version: 5) do
   add_foreign_key "certificates", "clients"
   add_foreign_key "clients", "credentials", column: "credentials_id"
   add_foreign_key "http_listeners", "load_balancers"
+  add_foreign_key "https_listeners", "certificates"
+  add_foreign_key "https_listeners", "load_balancers"
   add_foreign_key "load_balancers", "clients"
 end
