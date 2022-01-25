@@ -12,7 +12,10 @@ module ActsAsAws
       object1 = Certificate.new(attrs)
       assert !object1.acm_certificate_present?
       object1.save!
+
       assert_equal ActsAsAws::CREATED_STATUS, object1.acm_certificate_status, object1.acm_certificate_error
+      assert object1.acm_certificate_arn.present?
+
       sleep 1
       assert object1.acm_certificate_present?
       object1.destroy!
