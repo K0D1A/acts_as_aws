@@ -72,16 +72,22 @@ module ActsAsAws
               return true
             else
               logger.info "missing #{object_type} #{identifier}"
-              update_columns(status_attr => MISSING_STATUS, error_attr => [e.class.name, e.message].join(': '))
+              if persisted?
+                update_columns(status_attr => MISSING_STATUS)
+              else
+                send :"#{status_attr}=", MISSING_STATUS
+              end
             end
           rescue StandardError => e
             logger.error e
 
+            status = missing_error_class && e.is_a?(missing_error_class) ? MISSING_STATUS : PRESENCE_ERROR_STATUS
+            error = [e.class.name, e.message].join(': ')
             if persisted?
-              status = missing_error_class && e.is_a?(missing_error_class) ? MISSING_STATUS : PRESENCE_ERROR_STATUS
-              update_columns(status_attr => status, error_attr => [e.class.name, e.message].join(': '))
+              update_columns(status_attr => status, error_attr => error)
             else
-              raise e
+              send :"#{status_attr}=", status
+              send :"#{error_attr}=", error
             end
           end
 
