@@ -9,20 +9,25 @@ module ActsAsAws
         private_key: File.read(ENV.fetch('ACTS_AS_AWS_TEST_ACM_CERTIFICATE_PRIVATE_KEY_FILE')),
         ca_bundle: File.read(ENV.fetch('ACTS_AS_AWS_TEST_ACM_CERTIFICATE_CA_BUNDLE_FILE'))
       }
-      object1 = Certificate.new(attrs)
-      assert !object1.acm_certificate_present?
-      object1.save!
+      create_obj = Certificate.new(attrs)
+      assert !create_obj.acm_certificate_present?
+      create_obj.save!
 
-      assert_equal ActsAsAws::CREATED_STATUS, object1.acm_certificate_status, object1.acm_certificate_error
-      assert object1.acm_certificate_arn.present?
-
+      assert_equal ActsAsAws::PRESENT_STATUS, create_obj.acm_certificate_status, create_obj.acm_certificate_error
+      assert create_obj.acm_certificate_arn.present?
       sleep 1
-      assert object1.acm_certificate_present?
-      object1.destroy!
+      assert create_obj.acm_certificate_present?
 
-      object2 = Certificate.create!(attrs.merge(acm_certificate_arn: object1.acm_certificate_arn, acm_certificate_status: ActsAsAws::CREATED_STATUS))
-      assert !object2.acm_certificate_present?
-      assert_equal ActsAsAws::MISSING_STATUS, object2.acm_certificate_status, object2.acm_certificate_error
+      attrs[:acm_certificate_arn] = create_obj.acm_certificate_arn
+      present_obj = Certificate.create!(attrs)
+      assert_equal ActsAsAws::PRESENT_STATUS, present_obj.acm_certificate_status
+
+      create_obj.destroy!
+      present_obj.destroy!
+
+      missing_obj = Certificate.create!(attrs)
+      assert !missing_obj.acm_certificate_present?
+      assert_equal ActsAsAws::MISSING_STATUS, missing_obj.acm_certificate_status
     end
   end
 end

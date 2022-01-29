@@ -7,23 +7,28 @@ module ActsAsAws
         client: client,
         name: 'acts-as-aws-test',
       }
-      object1 = LoadBalancer.new(attrs)
-      assert !object1.aws_load_balancer_present?
-      object1.save!
+      create_obj = LoadBalancer.new(attrs)
+      assert !create_obj.aws_load_balancer_present?
+      create_obj.save!
 
-      assert_equal ActsAsAws::CREATED_STATUS, object1.aws_load_balancer_status, object1.aws_load_balancer_error
-      assert object1.aws_load_balancer_arn.present?
-      assert object1.hostname.present?
+      assert_equal ActsAsAws::PRESENT_STATUS, create_obj.aws_load_balancer_status, create_obj.aws_load_balancer_error
+      assert create_obj.aws_load_balancer_arn.present?
+      assert create_obj.hostname.present?
 
-      client.elb_client.wait_until(:load_balancer_exists, load_balancer_arns: [object1.aws_load_balancer_arn])
-      assert object1.aws_load_balancer_present?
+      client.elb_client.wait_until(:load_balancer_exists, load_balancer_arns: [create_obj.aws_load_balancer_arn])
+      assert create_obj.aws_load_balancer_present?
 
-      object1.destroy!
-      client.elb_client.wait_until(:load_balancers_deleted, load_balancer_arns: [object1.aws_load_balancer_arn])
+      attrs[:aws_load_balancer_arn] = create_obj.aws_load_balancer_arn
+      present_obj = LoadBalancer.create!(attrs)
+      assert_equal ActsAsAws::PRESENT_STATUS, present_obj.aws_load_balancer_status
 
-      object2 = LoadBalancer.create!(attrs.merge(aws_load_balancer_arn: object1.aws_load_balancer_arn, aws_load_balancer_status: ActsAsAws::CREATED_STATUS))
-      assert !object2.aws_load_balancer_present?
-      assert_equal ActsAsAws::MISSING_STATUS, object2.aws_load_balancer_status, object2.aws_load_balancer_error
+      create_obj.destroy!
+      client.elb_client.wait_until(:load_balancers_deleted, load_balancer_arns: [create_obj.aws_load_balancer_arn])
+      present_obj.destroy!
+
+      missing_obj = LoadBalancer.create!(attrs)
+      assert !missing_obj.aws_load_balancer_present?
+      assert_equal ActsAsAws::MISSING_STATUS, missing_obj.aws_load_balancer_status, missing_obj.aws_load_balancer_error
     end
   end
 end

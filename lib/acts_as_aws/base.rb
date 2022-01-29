@@ -1,5 +1,5 @@
 module ActsAsAws
-  CREATED_STATUS = 'created'
+  PRESENT_STATUS = 'present'
   DELETED_STATUS = 'deleted'
   MISSING_STATUS = 'missing'
   CREATION_ERROR_STATUS = 'creation_error'
@@ -33,7 +33,7 @@ module ActsAsAws
             client = send(client_method)
             attrs = creation_proc.call client, params
             logger.info "created #{object_type} #{attrs.inspect}"
-            update_columns attrs.merge(status_attr => CREATED_STATUS)
+            update_columns attrs.merge(status_attr => PRESENT_STATUS)
           rescue StandardError => e
             logger.error e
             update_columns(status_attr => CREATION_ERROR_STATUS, error_attr => [e.class.name, e.message].join(': '))
@@ -60,15 +60,17 @@ module ActsAsAws
 
         define_method presence_method do
           begin
-            status = send(status_attr)
-            return false unless status.to_s == CREATED_STATUS
-
             identifier = send(identifier_attr)
             return false if identifier.blank?
 
             client = send(client_method)
             if presence_proc.call(client, identifier)
               logger.debug "found #{object_type} #{identifier}"
+              if persisted?
+                update_columns(status_attr => PRESENT_STATUS)
+              else
+                send :"#{status_attr}=", PRESENT_STATUS
+              end
               return true
             else
               logger.info "missing #{object_type} #{identifier}"
@@ -80,13 +82,13 @@ module ActsAsAws
             end
           rescue StandardError => e
             logger.error e
+            raise e unless missing_error_class && e.is_a?(missing_error_class)
 
-            status = missing_error_class && e.is_a?(missing_error_class) ? MISSING_STATUS : PRESENCE_ERROR_STATUS
             error = [e.class.name, e.message].join(': ')
             if persisted?
-              update_columns(status_attr => status, error_attr => error)
+              update_columns(status_attr => MISSING_STATUS, error_attr => error)
             else
-              send :"#{status_attr}=", status
+              send :"#{status_attr}=", MISSING_STATUS
               send :"#{error_attr}=", error
             end
           end
@@ -94,6 +96,7 @@ module ActsAsAws
           false
         end
 
+        before_create presence_method, if: identifier_attr
         after_create create_method, unless: identifier_attr
         before_destroy delete_method
       end

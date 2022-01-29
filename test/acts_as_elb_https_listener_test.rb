@@ -8,20 +8,24 @@ module ActsAsAws
         certificate: @certificate,
         elb_ssl_policy: 'ELBSecurityPolicy-2015-05',
       }
-      object1 = HttpsListener.new(attrs)
-      assert !object1.elb_https_listener_present?
-      object1.save!
+      create_obj = HttpsListener.new(attrs)
+      assert !create_obj.elb_https_listener_present?
+      create_obj.save!
 
-      assert_equal ActsAsAws::CREATED_STATUS, object1.elb_https_listener_status, object1.elb_https_listener_error
-      assert object1.elb_https_listener_arn.present?
+      assert_equal ActsAsAws::PRESENT_STATUS, create_obj.elb_https_listener_status, create_obj.elb_https_listener_error
+      assert create_obj.elb_https_listener_arn.present?
 
-      assert object1.elb_https_listener_present?
-      object1.destroy!
+      attrs[:elb_https_listener_arn] = create_obj.elb_https_listener_arn
+      present_obj = HttpsListener.create!(attrs)
+      assert_equal ActsAsAws::PRESENT_STATUS, present_obj.elb_https_listener_status
 
-      object2 = HttpsListener.create!(attrs.merge(elb_https_listener_arn: object1.elb_https_listener_arn, elb_https_listener_status: ActsAsAws::CREATED_STATUS))
-      assert !object2.elb_https_listener_present?
-      assert_equal ActsAsAws::MISSING_STATUS, object2.elb_https_listener_status, object2.elb_https_listener_error
-      object2.destroy!
+      create_obj.destroy!
+      present_obj.destroy!
+
+      missing_obj = HttpsListener.create!(attrs.merge(elb_https_listener_arn: create_obj.elb_https_listener_arn, elb_https_listener_status: ActsAsAws::PRESENT_STATUS))
+      assert !missing_obj.elb_https_listener_present?
+      assert_equal ActsAsAws::MISSING_STATUS, missing_obj.elb_https_listener_status, missing_obj.elb_https_listener_error
+      missing_obj.destroy!
     end
 
     private
