@@ -7,7 +7,7 @@ module ActsAsAws
       def acts_as_elb_http_listener(**options)
         load_balancer_arn_attr = options[:load_balancer_arn_attr] || :aws_load_balancer_arn
         listener_arn_attr = options[:listener_arn_attr] || :elb_http_listener_arn
-        port = options[:port] || 80
+        port_attr = options[:port_attr] || :elb_http_listener_port
 
         acts_as_aws(
           object_type: :elb_http_listener,
@@ -17,7 +17,7 @@ module ActsAsAws
             {
               load_balancer_arn: record.send(load_balancer_arn_attr),
               protocol: 'HTTP',
-              port: port,
+              port: record.respond_to?(port_attr) ? record.send(port_attr) : 80,
               default_actions: [
                 type: 'fixed-response',
                 fixed_response_config: {

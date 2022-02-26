@@ -9,7 +9,7 @@ module ActsAsAws
         certificate_arn_attr = options[:certificate_arn_attr] || :acm_certificate_arn
         ssl_policy_attr = options[:ssl_policy_attr] || :elb_ssl_policy
         listener_arn_attr = options[:listener_arn_attr] || :elb_https_listener_arn
-        port = options[:port] || 443
+        port_attr = options[:port_attr] || :elb_https_listener_port
 
         acts_as_aws(
           object_type: :elb_https_listener,
@@ -19,7 +19,7 @@ module ActsAsAws
             {
               load_balancer_arn: record.send(load_balancer_arn_attr),
               protocol: 'HTTPS',
-              port: port,
+              port: record.respond_to?(port_attr) ? record.send(port_attr) : 443,
               certificates: [{ certificate_arn: record.send(certificate_arn_attr) }],
               ssl_policy: record.send(ssl_policy_attr),
               default_actions: [
