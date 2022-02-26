@@ -20,7 +20,7 @@ module ActsAsAws
               certificate: record.send(certificate_attr),
               private_key: record.send(private_key_attr),
               certificate_chain: record.send(ca_bundle_attr),
-              tags: { 'Name' => record.send(name_attr) },
+              tags: [{ key: 'Name', value: record.send(name_attr) }],
             }
           end,
           creation_proc: ->(client, params) do
