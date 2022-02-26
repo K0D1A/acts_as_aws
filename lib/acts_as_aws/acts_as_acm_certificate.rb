@@ -6,21 +6,21 @@ module ActsAsAws
     class_methods do
       def acts_as_acm_certificate(**options)
         arn_attr = options[:arn_attr] || :acm_certificate_arn
+        name_attr = options[:name_attr] || :acm_certificate_name
         certificate_attr = options[:certificate_attr] || :certificate
         private_key_attr = options[:private_key_attr] || :private_key
         ca_bundle_attr = options[:ca_bundle_attr] || :ca_bundle
-        tags_method = options[:tags_method] || :acm_certificate_tags
+
         acts_as_aws(
           client_method: options[:client_method] || :acm_client,
           object_type: :acm_certificate,
           identifier_attr: arn_attr,
           creation_params_proc: ->(record) do
-            tags = record.respond_to?(tags_method) ? record.send(tags_method) : {}
             {
               certificate: record.send(certificate_attr),
               private_key: record.send(private_key_attr),
               certificate_chain: record.send(ca_bundle_attr),
-              tags: tags.map {|k, v| { key: k, value: v } },
+              tags: { 'Name' => record.send(name_attr) },
             }
           end,
           creation_proc: ->(client, params) do
