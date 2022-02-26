@@ -8,11 +8,11 @@ module ActsAsAws
         arn_attr = options[:arn_attr] || :aws_load_balancer_arn
         name_attr = options[:name_attr] || :name
         hostname_attr = options[:hostname_attr] || :hostname
-        subnets_method = options[:subnets_method] || :aws_load_balancer_subnets
-        security_groups_method = options[:security_groups_method]
+        subnet_ids_attr = options[:subnet_ids_attr] || :aws_load_balancer_subnet_ids
+        security_group_ids_attr = options[:security_group_ids_attr] || :aws_load_balancer_security_group_ids
 
         validate(on: :create) do
-          errors.add :base, 'must have at least two subnets defined' unless send(subnets_method).length >= 2
+          errors.add :base, 'must have at least two subnets defined' unless send(subnet_ids_attr).length >= 2
         end
 
         acts_as_aws(
@@ -22,8 +22,8 @@ module ActsAsAws
           creation_params_proc: ->(record) do
             {
               name: record.send(name_attr),
-              subnets: subnets_method ? record.send(subnets_method) : nil,
-              security_groups: security_groups_method ? record.send(security_groups_method) : nil,
+              subnets: record.respond_to?(subnet_ids_attr) ? record.send(subnet_ids_attr) : nil,
+              security_groups: record.respond_to?(security_group_ids_attr) ? record.send(security_group_ids_attr) : nil,
             }.compact
           end,
           creation_proc: ->(client, params) do
