@@ -11,6 +11,7 @@ require 'acts_as_aws/acts_as_acm_certificate'
 require 'acts_as_aws/acts_as_aws_load_balancer'
 require 'acts_as_aws/acts_as_elb_http_listener'
 require 'acts_as_aws/acts_as_elb_https_listener'
+require 'acts_as_aws/acts_as_elb_target_group'
 
 require 'acts_as_aws/version'
 require 'acts_as_aws/engine'

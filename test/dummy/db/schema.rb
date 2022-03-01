@@ -10,11 +10,12 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 6) do
+ActiveRecord::Schema.define(version: 7) do
 
   create_table "certificates", force: :cascade do |t|
     t.integer "client_id", null: false
     t.string "acm_certificate_arn"
+    t.string "acm_certificate_name"
     t.string "acm_certificate_status"
     t.string "acm_certificate_error"
     t.string "certificate"
@@ -75,10 +76,22 @@ ActiveRecord::Schema.define(version: 6) do
     t.index ["client_id"], name: "index_load_balancers_on_client_id"
   end
 
+  create_table "target_groups", force: :cascade do |t|
+    t.integer "client_id", null: false
+    t.string "elb_target_group_arn"
+    t.string "elb_target_group_name"
+    t.string "elb_target_group_status"
+    t.string "elb_target_group_error"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["client_id"], name: "index_target_groups_on_client_id"
+  end
+
   add_foreign_key "certificates", "clients"
   add_foreign_key "clients", "credentials", column: "credentials_id"
   add_foreign_key "http_listeners", "load_balancers"
   add_foreign_key "https_listeners", "certificates"
   add_foreign_key "https_listeners", "load_balancers"
   add_foreign_key "load_balancers", "clients"
+  add_foreign_key "target_groups", "clients"
 end

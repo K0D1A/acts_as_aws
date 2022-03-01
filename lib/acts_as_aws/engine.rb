@@ -8,6 +8,7 @@ module ActsAsAws
         include ActsAsAwsLoadBalancer
         include ActsAsElbHttpListener
         include ActsAsElbHttpsListener
+        include ActsAsElbTargetGroup
       end
     end
   end
