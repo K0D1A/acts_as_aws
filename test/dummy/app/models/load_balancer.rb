@@ -5,10 +5,10 @@ class LoadBalancer < ApplicationRecord
   acts_as_aws_load_balancer
 
   def aws_load_balancer_subnet_ids
-    ENV.fetch('ACTS_AS_AWS_TEST_AWS_LOAD_BALANCER_SUBNETS').split(',')
+    ENV.fetch('ACTS_AS_AWS_TEST_AWS_LOAD_BALANCER_SUBNET_IDS').split(',')
   end
 
   def aws_load_balancer_security_group_ids
-    ENV.fetch('ACTS_AS_AWS_TEST_AWS_LOAD_BALANCER_SECURITY_GROUPS').split(',')
+    ENV.fetch('ACTS_AS_AWS_TEST_AWS_LOAD_BALANCER_SECURITY_GROUP_IDS').split(',')
   end
 end
