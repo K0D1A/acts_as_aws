@@ -15,12 +15,17 @@ Rake::TestTask.new(:test) do |t|
   t.verbose = false
 end
 
-task :rebuild_db do
-  Rake::Task['app:db:drop'].invoke
-  Rake::Task['app:db:create'].invoke
-  Rake::Task['app:db:migrate'].invoke
+namespace :db do
+  task :rebuild do
+    Rake::Task['app:db:drop'].invoke
+    Rake::Task['app:db:create'].invoke
+    Rake::Task['app:db:migrate'].invoke
+  end
 end
 
-task :all => [:rebuild_db, :test]
+task :all do
+  Rake::Task['db:rebuild'].invoke
+  Rake::Task['test'].invoke
+end
 
 task default: :test
