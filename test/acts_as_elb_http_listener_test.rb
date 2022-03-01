@@ -28,7 +28,7 @@ module ActsAsAws
     private
 
     def setup
-      @load_balancer = LoadBalancer.create!(client: client, name: 'acts-as-aws-test-https')
+      @load_balancer = LoadBalancer.create!(client: client, name: 'elb-test-http-listener')
       client.elb_client.wait_until(:load_balancer_exists, load_balancer_arns: [@load_balancer.aws_load_balancer_arn])
     end
 

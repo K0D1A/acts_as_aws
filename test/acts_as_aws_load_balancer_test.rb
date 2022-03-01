@@ -5,7 +5,7 @@ module ActsAsAws
     test 'acts_as_aws_load_balancer' do
       attrs = {
         client: client,
-        name: 'acts-as-aws-test',
+        name: 'elb-test',
       }
       create_obj = LoadBalancer.new(attrs)
       assert !create_obj.aws_load_balancer_present?
